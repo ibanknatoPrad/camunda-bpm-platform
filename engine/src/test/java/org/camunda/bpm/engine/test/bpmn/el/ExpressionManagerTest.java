@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -141,4 +142,35 @@ public class ExpressionManagerTest extends PluggableProcessEngineTest {
 
     repositoryService.deleteDeployment(deployment.getId(), true);
   }
+
+  @Test
+  @RequiredHistoryLevel(ProcessEngineConfiguration.HISTORY_FULL)
+  public void shouldCompareWithBigDecimal() {
+    final BpmnModelInstance process = Bpmn.createExecutableProcess("testProcess")
+        .startEvent()
+          .exclusiveGateway()
+            .condition("true", "${total.compareTo(myValue) >= 0}")
+            .userTask("userTask")
+          .moveToLastGateway()
+            .condition("false", "${total.compareTo(myValue) < 0}")
+            .endEvent()
+        .done();
+
+    org.camunda.bpm.engine.repository.Deployment deployment = repositoryService.createDeployment()
+        .addModelInstance("testProcess.bpmn", process)
+        .deploy();
+
+    runtimeService.startProcessInstanceByKey("testProcess",
+        Variables.createVariables()
+            .putValue("total", new BigDecimal(123))
+            .putValue("myValue", new BigDecimal(0)));
+
+    HistoricActivityInstance userTask = historyService.createHistoricActivityInstanceQuery()
+        .activityId("userTask")
+        .singleResult();
+    assertThat(userTask).isNotNull();
+
+    repositoryService.deleteDeployment(deployment.getId(), true);
+  }
+
 }
