@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -505,7 +506,7 @@ public class BeanELResolver extends ELResolver {
 		boolean noTypesInitially = types == null;
 		if (noTypesInitially) {
 			Set<Class<?>> detectedTypes = new HashSet<>();
-			Arrays.asList(params).forEach(param -> detectedTypes.add(param.getClass()));
+			Arrays.stream(params).filter(Objects::nonNull).forEach(param -> detectedTypes.add(param.getClass()));
 
 			if (!detectedTypes.isEmpty()) {
 				types = detectedTypes.toArray(new Class<?>[0]);
