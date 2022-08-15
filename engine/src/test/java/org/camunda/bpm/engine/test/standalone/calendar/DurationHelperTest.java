@@ -34,7 +34,7 @@ public class DurationHelperTest {
   public void tearDown() {
     ClockUtil.reset();
   }
-  
+
   @Test
   public void shouldNotExceedNumber() throws Exception {
     ClockUtil.setCurrentTime(new Date(0));
@@ -43,9 +43,27 @@ public class DurationHelperTest {
     ClockUtil.setCurrentTime(new Date(15000));
     assertEquals(20000, dh.getDateAfter().getTime());
 
-
     ClockUtil.setCurrentTime(new Date(30000));
     assertNull(dh.getDateAfter());
+  }
+
+  @Test
+  public void shouldNotExceedNumberWithStartDateExpression() throws Exception {
+    // given
+    ClockUtil.setCurrentTime(parse("19700101-00:00:00"));
+
+    // when
+    DurationHelper dh = new DurationHelper("R2/1970-01-01T00:01:00/PT10S");
+
+    // then should trigger twice
+    ClockUtil.setCurrentTime(parse("19700101-00:00:05"));
+    assertThat(dh.getDateAfter()).isEqualTo(parse("19700101-00:01:00"));
+
+    ClockUtil.setCurrentTime(parse("19700101-00:01:05"));
+    assertThat(dh.getDateAfter()).isEqualTo(parse("19700101-00:01:10"));
+
+    ClockUtil.setCurrentTime(parse("19700101-00:01:15"));
+    assertThat(dh.getDateAfter()).isNull();
   }
 
   @Test
@@ -55,7 +73,6 @@ public class DurationHelperTest {
 
     ClockUtil.setCurrentTime(parse("19700101-00:00:15"));
     assertEquals(parse("19700101-00:00:20"), dh.getDateAfter());
-
 
     ClockUtil.setCurrentTime(parse("19700101-00:00:30"));
     assertNull(dh.getDateAfter());
@@ -69,12 +86,11 @@ public class DurationHelperTest {
     ClockUtil.setCurrentTime(parse("19700101-00:00:20"));
     assertEquals(parse("19700101-00:00:30"), dh.getDateAfter());
 
-
     ClockUtil.setCurrentTime(parse("19700101-00:00:35"));
 
     assertEquals(parse("19700101-00:00:40"), dh.getDateAfter());
   }
-  
+
   @Test
   public void shouldNotExceedNumberWithStartDate() throws Exception {
     DurationHelper dh = new DurationHelper("R2/PT10S", new Date(0));
@@ -98,7 +114,7 @@ public class DurationHelperTest {
 
     assertEquals(parse("19700101-00:00:40"), dh.getDateAfter(parse("19700101-00:00:35")));
   }
-  
+
   @Test
   public void shouldParseAllSupportedISO8601DurationPatterns() throws Exception {
     // given
