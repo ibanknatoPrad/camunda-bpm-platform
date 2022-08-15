@@ -1677,7 +1677,7 @@ public class StartTimerEventTest extends PluggableProcessEngineTest {
     assertThat(at110000).hasSize(1);
     assertThat(at110015).hasSize(2);
     assertThat(at110030).hasSize(3);
-    // should only start 2 instances
+    // should only start 3 instances
     assertThat(at110045).hasSize(3);
   }
 
